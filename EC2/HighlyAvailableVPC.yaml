@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Empty VPC
+Resources:
+  ExamVPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.20.0.0/16
+      Tags:
+        - Key: Name
+          Value: ExamVPC
+  LabIGW:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties: {}
+  AttachGateway:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref ExamVPC
+      InternetGatewayId: !Ref LabIGW
+  public1:
+    Type: 'AWS::EC2::Subnet'
+    Properties: 
+      CidrBlock: 10.20.1.0/24
+      AvailabilityZone: us-east-1a
+      VpcId: !Ref ExamVPC
+  public2:
+    Type: 'AWS::EC2::Subnet'
+    Properties: 
+      CidrBlock: 10.20.2.0/24
+      AvailabilityZone: us-east-1b
+      VpcId: !Ref ExamVPC
+  private1:
+    Type: 'AWS::EC2::Subnet'
+    Properties: 
+      CidrBlock: 10.20.3.0/24
+      AvailabilityZone: us-east-1a
+      VpcId: !Ref ExamVPC
+  private2:
+    Type: 'AWS::EC2::Subnet'
+    Properties: 
+      CidrBlock: 10.20.4.0/24
+      AvailabilityZone: us-east-1b
+      VpcId: !Ref ExamVPC
+  pubrt:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref ExamVPC
+      Tags:
+        - Key: Name
+          Value: pubrt
+  Subnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref pubrt
+      SubnetId: !Ref public1
+  Subnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref pubrt
+      SubnetId: !Ref public2
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref pubrt
+      GatewayId: !Ref LabIGW
+      DestinationCidrBlock: 0.0.0.0/0
